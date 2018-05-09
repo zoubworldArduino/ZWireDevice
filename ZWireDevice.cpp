@@ -12,6 +12,7 @@
 #include "ZWireDevice.h"
 ZWireDevice::ZWireDevice() {
 	SerialDebug = 0;
+        SlaveDevice_prQ = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -50,17 +51,25 @@ void ZWireDevice::setSerialDebug(HardwareSerial & mySerialDebug) {
 	/* else
 		  SerialDebug->println("SerialDbg(false)");*/
 }
+#if !defined( BUFFER_LENGTH)
+#define BUFFER_LENGTH 32
+#endif
 void ZWireDevice::requestEvent() {
 
 	if (SerialDebug)
 		SerialDebug->println("requestEvent ");
 	if (onRead)
 		onRead((int) SlaveDevice_prQ);
-	for(int i=0;i<BUFFER_LENGTH/2;i++)
+	for(int i=0;i<BUFFER_LENGTH;i++)
 	{
-	SerialDebug->print("*(");SerialDebug->print((uint16_t)(SlaveDevice_prQ));SerialDebug->print("+");SerialDebug->print((uint16_t)(SlaveDevice_pmem));SerialDebug->print(")= ");
-	uint8_t value=(uint8_t) * (SlaveDevice_prQ + SlaveDevice_pmem);
-			SerialDebug->println(value);
+		if (SerialDebug)
+		{
+	SerialDebug->print("*(");SerialDebug->print((uint16_t)(SlaveDevice_prQ));SerialDebug->print("+");SerialDebug->print((uint32_t)(SlaveDevice_pmem));SerialDebug->print(")= ");
+		}
+		uint8_t value=(uint8_t) * (SlaveDevice_prQ + SlaveDevice_pmem);
+				if (SerialDebug)
+		{	SerialDebug->println(value);
+	}
 	_i2c->write(value); //send mem[prQ]
 	
 	if (SerialDebug)
@@ -107,7 +116,7 @@ void ZWireDevice::receiveEvent(int iData) {
 		*(SlaveDevice_prQ + SlaveDevice_pmem) = _i2c->read();
 		if (SerialDebug)
 		{
-			SerialDebug->print("*(");SerialDebug->print((uint16_t)(SlaveDevice_prQ+SlaveDevice_pmem));SerialDebug->print(")= ");
+			SerialDebug->print("*(");SerialDebug->print((uint32_t)(SlaveDevice_prQ+SlaveDevice_pmem));SerialDebug->print(")= ");
 	
 			SerialDebug->println(*(SlaveDevice_prQ + SlaveDevice_pmem));
 		}

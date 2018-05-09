@@ -66,7 +66,7 @@ private:
 	uint8_t _i2caddr;
 	TwoWire *_i2c;
 	uint8_t * SlaveDevice_pmem;
-	unsigned int SlaveDevice_prQ = 0;
+	unsigned int SlaveDevice_prQ;
 	HardwareSerial * SerialDebug;
 };
 
